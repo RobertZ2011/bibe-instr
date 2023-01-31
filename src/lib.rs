@@ -1,6 +1,7 @@
-use std::convert::TryFrom;
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
+
+pub mod rdrsrs;
 
 #[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
 pub enum Register {
@@ -97,9 +98,10 @@ pub enum RegOp {
 
 trait Encode where Self: Sized {
 	fn encode(&self) -> u32;
-	fn decode(value: u32) -> Option<Self>;
+	fn decode(value: u32) -> Self;
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum Instruction {
+	RdRsRs(Common, rdrsrs::Instruction)
 }
