@@ -2,6 +2,7 @@ use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 
 pub mod rdrsrs;
+pub mod rdrsi;
 
 #[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
 pub enum Register {
@@ -97,13 +98,15 @@ trait Encode where Self: Sized {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Instruction {
-	RdRsRs(Condition, rdrsrs::Instruction)
+	RdRsRs(Condition, rdrsrs::Instruction),
+	RdRsI(Condition, rdrsi::Instruction),
 }
 
 impl Instruction {
 	pub fn condition(&self) -> Condition {
 		match &self  {
-			Instruction::RdRsRs(condition, _) => *condition
+			Instruction::RdRsRs(condition, _) => *condition,
+			Instruction::RdRsI(condition, _) => *condition,
 		}
 	}
 }
