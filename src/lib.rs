@@ -39,7 +39,7 @@ pub enum Register {
 	R31,
 }
 
-#[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum Condition {
 	Always,
 	Eq,
@@ -57,12 +57,6 @@ pub enum Kind {
 	RdRsI,
 	Memory,
 	Res0,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct Common {
-	pub cond: Condition,
-	pub kind: Kind,
 }
 
 #[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
@@ -103,5 +97,13 @@ trait Encode where Self: Sized {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Instruction {
-	RdRsRs(Common, rdrsrs::Instruction)
+	RdRsRs(Condition, rdrsrs::Instruction)
+}
+
+impl Instruction {
+	pub fn condition(&self) -> Condition {
+		match &self  {
+			Instruction::RdRsRs(condition, _) => *condition
+		}
+	}
 }
