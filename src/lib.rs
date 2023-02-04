@@ -1,5 +1,6 @@
 use num_derive::{ FromPrimitive, ToPrimitive };
 
+pub mod custom;
 pub mod memory;
 pub mod rrr;
 pub mod rri;
@@ -43,6 +44,7 @@ pub enum BinOp {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Instruction {
+	Custom(custom::Instruction),
 	Memory(memory::Instruction),
 	Rrr(rrr::Instruction),
 	Rri(rri::Instruction),
