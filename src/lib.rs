@@ -1,21 +1,24 @@
 use num_derive::{ FromPrimitive, ToPrimitive };
-use num_traits::{ FromPrimitive, ToPrimitive };
+
+pub mod memory;
+pub mod rrr;
+pub mod rri;
+pub mod state;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Register(u8);
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-pub enum Condition {
-	Al,
-	Eq,
-	Ne,
-	Gt,
-	Ge,
-	Lt,
-	Le,
+impl Register {
+	pub fn new(reg: u8) -> Option<Register> {
+		if reg > 31 {
+			None
+		} else {
+			Some(Register(reg))
+		}
+	}
 }
 
-#[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum BinOp {
 	Add,
 	Sub,
@@ -24,21 +27,24 @@ pub enum BinOp {
 
 	And,
     Or,
-    Xor
+    Xor,
 
-	ShiftL,
-    ShiftR,
-    AshiftL,
-    AshiftR,
+	Shl,
+    Shr,
+    Asl,
+    Asr,
+	Rol,
+	Ror,
+
+	Not,
+	Neg,
+	Sxt,
 }
 
-#[derive(Clone, Copy, Debug, FromPrimitive, ToPrimitive)]
-pub enum Kind {
-	Rrr,
-	Memory,
-	State,
-	Unary,
-	Rri,
-	Rric,
-	ImplDefined,
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Instruction {
+	Memory(memory::Instruction),
+	Rrr(rrr::Instruction),
+	Rri(rri::Instruction),
+	State(state::Instruction)
 }
