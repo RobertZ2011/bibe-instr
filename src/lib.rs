@@ -187,6 +187,7 @@ pub enum BinOp {
 
 	Not,
 	Neg,
+	Cmp,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

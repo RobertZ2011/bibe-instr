@@ -14,6 +14,7 @@ pub enum Condition {
 	Ge,
 	Lt,
 	Le,
+    Nv,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
