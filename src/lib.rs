@@ -43,7 +43,6 @@ pub enum BinOp {
 
 	Not,
 	Neg,
-	Sxt,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

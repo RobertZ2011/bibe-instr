@@ -20,7 +20,7 @@ pub enum Condition {
 pub struct Instruction {
     pub op: BinOp,
     pub cond: Condition,
-    pub target: Register,
-    pub index: Register,
+    pub dest: Register,
+    pub src: Register,
     pub imm: i16,
 }
