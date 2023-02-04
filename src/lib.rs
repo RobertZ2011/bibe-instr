@@ -4,7 +4,7 @@ pub mod custom;
 pub mod memory;
 pub mod rrr;
 pub mod rri;
-pub mod state;
+pub mod model;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Register(u8);
@@ -196,5 +196,5 @@ pub enum Instruction {
 	Memory(memory::Instruction),
 	Rrr(rrr::Instruction),
 	Rri(rri::Instruction),
-	State(state::Instruction)
+	Model(model::Instruction)
 }
