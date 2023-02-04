@@ -17,6 +17,10 @@ impl Register {
 			Some(Register(reg))
 		}
 	}
+
+	pub fn as_u8(self) -> u8 {
+		self.0
+	}
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
