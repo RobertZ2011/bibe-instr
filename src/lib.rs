@@ -7,6 +7,7 @@ pub mod memory;
 pub mod rrr;
 pub mod rri;
 pub mod model;
+pub mod util;
 
 pub trait Encode where Self: Sized {
 	fn decode(value: u32) -> Option<Self>;
@@ -306,7 +307,7 @@ impl Encode for Instruction {
 			//Instruction::Memory(i) => i.encode(),
 			//Instruction::Model(i) => i.encode(),
 			Instruction::Rrr(i) => i.encode(),
-			//Instruction::Rri(i) => i.encode(),
+			Instruction::Rri(i) => i.encode(),
 			_ => panic!("Unsupported instruction type"),
 		}
 	}
