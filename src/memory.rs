@@ -48,7 +48,7 @@ impl Operation {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
 	pub op: Operation,
 	pub dest: Register,

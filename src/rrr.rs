@@ -30,13 +30,13 @@ impl Encode for ShiftKind {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Shift {
 	pub kind: ShiftKind,
 	pub shift: u8,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
 	pub op: BinOp,
 	pub dest: Register,

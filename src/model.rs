@@ -8,7 +8,7 @@ pub enum Operation {
     Write,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
     op: Operation,
     reg: Register,

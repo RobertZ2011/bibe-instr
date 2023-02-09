@@ -36,7 +36,7 @@ impl Encode for Condition {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
 	pub op: BinOp,
 	pub cond: Condition,

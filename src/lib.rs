@@ -3,6 +3,7 @@ use log::debug;
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 
+pub mod asm;
 pub mod custom;
 pub mod memory;
 pub mod rrr;
@@ -221,7 +222,7 @@ impl Encode for BinOp {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Instruction {
 	Custom(custom::Instruction),
 	Memory(memory::Instruction),
