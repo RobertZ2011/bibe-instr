@@ -1,4 +1,5 @@
 use bitfield::bitfield;
+use log::debug;
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 
@@ -58,9 +59,10 @@ bitfield! {
 impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Instruction> {
 		let bitfield = Bitfield(value);
-		let kind = Kind::from_u32(bitfield.kind())?;
+		let kind = Kind::decode(value)?;
 	
 		if kind != Kind::Rri {
+			debug!("Not an RRI instruction, got {:?}", kind);
 			return None;
 		}
 
@@ -74,9 +76,7 @@ impl Encode for Instruction {
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = Bitfield(0);
-
-		bitfield.set_kind(Kind::Rri.encode());
+		let mut bitfield = Bitfield(Kind::Rri.encode());
 		bitfield.set_op(self.op.encode());
 		bitfield.set_rd(self.dest.encode());
 		bitfield.set_rs(self.src.encode());

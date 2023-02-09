@@ -1,6 +1,7 @@
 use bitfield::bitfield;
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
+use log::debug;
 
 use crate::{
 	BinOp,
@@ -59,9 +60,10 @@ bitfield! {
 impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Self> {
 		let bitfield = BitField(value);
-		let kind = Kind::from_u32(bitfield.kind())?;
+		let kind = Kind::decode(value)?;
 
 		if kind != Kind::Rrr {
+			debug!("Not an RRR instruction, got {:?}", kind);
 			return None;
 		}
 
@@ -78,9 +80,7 @@ impl Encode for Instruction {
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = BitField(0);
-
-		bitfield.set_kind(Kind::Rrr.encode());
+		let mut bitfield = BitField(Kind::Rrr.encode());
 		bitfield.set_op(self.op.encode());
 		bitfield.set_rd(self.dest.encode());
 		bitfield.set_rs(self.lhs.encode());

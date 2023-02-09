@@ -1,4 +1,5 @@
 use bitfield::bitfield;
+use log::debug;
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 
@@ -288,15 +289,16 @@ impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Self> {
 		let kind_res = Kind::decode(value);
 		if kind_res.is_none() {
+			debug!("Invalid instruction kind");
 			return None;
 		}
 
 		match kind_res.unwrap() {
 			//Kind::Custom => custom::Instruction::decode(value),
-			//Kind::Memory => memory::Instruction::decode(value),
+			Kind::Memory => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
 			//Kind::Model => model::Instruction::decode(value),
 			Kind::Rrr => Some(Instruction::Rrr(rrr::Instruction::decode(value)?)),
-			//Kind::Rri => rri::Instruction::decode(value),
+			Kind::Rri => Some(Instruction::Rri(rri::Instruction::decode(value)?)),
 			_ => None,
 		}
 	}
