@@ -240,6 +240,13 @@ pub enum Kind {
 	Rri,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
+pub enum Width {
+	Byte,
+	Short,
+	Word,
+}
+
 bitfield! {
 	struct KindBitfield(u32);
 	impl Debug;
