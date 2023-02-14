@@ -28,11 +28,11 @@ bitfield! {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
-	op: (OpType, Width),
-	rd: Register,
-	rs: Register,
-	rq: Register,
-	shift: u8,
+	pub op: (OpType, Width),
+	pub rd: Register,
+	pub rs: Register,
+	pub rq: Register,
+	pub shift: u8,
 }
 
 impl Encode for Instruction {

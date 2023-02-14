@@ -314,7 +314,7 @@ impl Encode for Instruction {
 	fn encode(&self) -> u32 {
 		match self {
 			//Instruction::Custom(i) => i.encode(),
-			//Instruction::Memory(i) => i.encode(),
+			Instruction::Memory(i) => i.encode(),
 			//Instruction::Model(i) => i.encode(),
 			Instruction::Rrr(i) => i.encode(),
 			Instruction::Rri(i) => i.encode(),

@@ -19,10 +19,10 @@ use bitfield::bitfield;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
-	op: (OpType, Width),
-	rd: Register,
-	rs: Register,
-	imm: i16,
+	pub op: (OpType, Width),
+	pub rd: Register,
+	pub rs: Register,
+	pub imm: i16,
 }
 
 bitfield! {
