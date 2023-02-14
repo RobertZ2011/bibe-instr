@@ -1,3 +1,4 @@
+/* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 pub const fn sign_contract(val: i32, target: u8) -> u32 {
 	let shift = 32 - target;
 	let unsigned = (val as u32) << shift;

@@ -1,3 +1,4 @@
+/* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 use bitfield::bitfield;

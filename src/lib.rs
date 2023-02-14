@@ -1,3 +1,4 @@
+/* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use bitfield::bitfield;
 use log::debug;
 use num_derive::{ FromPrimitive, ToPrimitive };
