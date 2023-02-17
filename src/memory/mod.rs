@@ -1,16 +1,11 @@
 /* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use num_derive::{ FromPrimitive, ToPrimitive };
-use num_traits::{ FromPrimitive, ToPrimitive };
+use num_traits::FromPrimitive ;
 use bitfield::bitfield;
 
 use crate::{
 	Encode,
 	Kind,
-	Register,
-	util:: {
-		sign_contract,
-		sign_extend,
-	},
 	Width,
 };
 
@@ -77,8 +72,6 @@ impl Operation {
 
 			(AddressMode::Ri, OpType::Load, Width::Word) => Some(Operation::LoadWRi),
 			(AddressMode::Ri, OpType::Store, Width::Word) => Some(Operation::StoreWRi),
-
-			_ => None,
 		}
 	}
 
