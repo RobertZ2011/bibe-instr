@@ -305,7 +305,7 @@ impl Encode for Instruction {
 		match kind_res.unwrap() {
 			//Kind::Custom => custom::Instruction::decode(value),
 			Kind::Memory => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
-			//Kind::Model => model::Instruction::decode(value),
+			Kind::Model => Some(Instruction::Model(model::Instruction::decode(value)?)),
 			Kind::Rrr => Some(Instruction::Rrr(rrr::Instruction::decode(value)?)),
 			Kind::Rri => Some(Instruction::Rri(rri::Instruction::decode(value)?)),
 			_ => None,
