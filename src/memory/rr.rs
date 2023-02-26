@@ -20,11 +20,11 @@ bitfield! {
 	impl Debug;
 	pub kind, set_kind : 31, 28;
 	pub op, set_op : 27, 23;
-	pub res, set_res : 22, 19;
-	pub rd, set_rd : 18, 14;
-	pub rs, set_rs : 13, 9;
-	pub rq, set_rq : 8, 4;
-	pub shift, set_shift : 3, 0;
+	pub rd, set_rd : 22, 18;
+	pub rs, set_rs : 17, 13;
+	pub rq, set_rq : 12, 8;
+	pub shift, set_shift : 7, 4;
+	pub res, set_res : 3, 0;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
