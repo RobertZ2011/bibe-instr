@@ -12,6 +12,8 @@ pub mod rri;
 pub mod model;
 pub mod util;
 
+pub use util::Width;
+
 pub trait Encode where Self: Sized {
 	fn decode(value: u32) -> Option<Self>;
 	fn encode(&self) -> u32;
@@ -239,13 +241,6 @@ pub enum Kind {
 	Model,
 	Rrr,
 	Rri,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-pub enum Width {
-	Byte,
-	Short,
-	Word,
 }
 
 bitfield! {
