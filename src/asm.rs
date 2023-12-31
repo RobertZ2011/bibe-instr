@@ -4,10 +4,8 @@ use crate::{
     Instruction,
     Register,
     rrr,
-    rrr::{ 
-        Shift,
-        ShiftKind,
-    },
+    Shift,
+    ShiftKind,
 };
 
 pub fn add_rs(rd :Register, rs: Register, rq: Register, shift: Option<Shift>) -> Instruction {

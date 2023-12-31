@@ -1,6 +1,5 @@
 /* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use bitfield::bitfield;
-use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 use log::debug;
 
@@ -9,33 +8,9 @@ use crate::{
 	Encode,
 	Kind,
 	Register,
+	Shift,
+	ShiftKind
 };
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-pub enum ShiftKind {
-	Shl,
-	Shr,
-	Asl,
-	Asr,
-	Rol,
-	Ror,
-}
-
-impl Encode for ShiftKind {
-	fn decode(value: u32) -> Option<ShiftKind> {
-		ShiftKind::from_u32(value)
-	}
-
-	fn encode(&self) -> u32 {
-		self.to_u32().unwrap()
-	}
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Shift {
-	pub kind: ShiftKind,
-	pub shift: u8,
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {

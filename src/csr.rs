@@ -59,7 +59,7 @@ impl Encode for Instruction {
 
 	fn encode(&self) -> u32 {
 		let mut bitfield = Bitfield(0);
-		bitfield.set_kind(Kind::Model.to_u32().unwrap());
+		bitfield.set_kind(Kind::Csr.to_u32().unwrap());
 		bitfield.set_op(self.op.to_u32().unwrap());
 		bitfield.set_reg(self.reg.as_u8() as u32);
 		bitfield.set_imm(self.imm);

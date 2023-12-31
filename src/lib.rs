@@ -5,14 +5,20 @@ use num_derive::{ FromPrimitive, ToPrimitive };
 use num_traits::{ FromPrimitive, ToPrimitive };
 
 pub mod asm;
-pub mod custom;
+pub mod misc;
 pub mod memory;
 pub mod rrr;
 pub mod rri;
-pub mod model;
+pub mod csr;
 pub mod util;
 
+mod shift;
+
+pub use rri::Condition;
 pub use util::Width;
+
+pub use shift::Kind as ShiftKind;
+pub use shift::Shift;
 
 pub trait Encode where Self: Sized {
 	fn decode(value: u32) -> Option<Self>;
@@ -227,20 +233,26 @@ impl Encode for BinOp {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Instruction {
-	Custom(custom::Instruction),
 	Memory(memory::Instruction),
-	Model(model::Instruction),
+	Csr(csr::Instruction),
 	Rrr(rrr::Instruction),
 	Rri(rri::Instruction),
+
+	Custom(misc::Custom),
+	Reserved10(misc::Reserved10),
+	Reservered0011(misc::Reserved0011),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum Kind {
-	Custom,
 	Memory,
-	Model,
+	Csr,
 	Rrr,
 	Rri,
+
+	Custom,
+	Reserved10,
+	Reserved0011
 }
 
 bitfield! {
@@ -251,12 +263,14 @@ bitfield! {
 }
 
 const MMR_HIGH: u32 = 0x0;
+const RRR_SUB: u32 = 0x0;
 const MEMORY_SUB: u32 = 0x1;
 const MODEL_SUB: u32 = 0x2;
-const RRR_SUB: u32 = 0x0;
+const RESERVED0011_SUB: u32 = 0x3;
 
 const RRI_HIGH: u32 = 0x1;
 const CUSTOM_HIGH: u32 = 0x3;
+const RESERVED10_HIGH: u32 = 0x2;
 
 impl Encode for Kind {
 	fn decode(value: u32) -> Option<Self> {
@@ -265,7 +279,7 @@ impl Encode for Kind {
 			MMR_HIGH => match bitfield.sub() {
 				RRR_SUB => Some(Kind::Rrr),
 				MEMORY_SUB => Some(Kind::Memory),
-				MODEL_SUB => Some(Kind::Model),
+				MODEL_SUB => Some(Kind::Csr),
 				_ => None, 
 			},
 			RRI_HIGH => Some(Kind::Rri),
@@ -278,11 +292,14 @@ impl Encode for Kind {
 		let mut bitfield = KindBitfield(0);
 		
 		match self {
-			Kind::Custom => bitfield.set_high(CUSTOM_HIGH),
 			Kind::Memory => bitfield.set_sub(MEMORY_SUB),
-			Kind::Model => bitfield.set_sub(MODEL_SUB),
+			Kind::Csr => bitfield.set_sub(MODEL_SUB),
 			Kind::Rrr => bitfield.set_high(MMR_HIGH),
 			Kind::Rri => bitfield.set_high(RRI_HIGH),
+
+			Kind::Custom => bitfield.set_high(CUSTOM_HIGH),
+			Kind::Reserved10 => bitfield.set_high(RESERVED10_HIGH),
+			Kind::Reserved0011 => bitfield.set_sub(RESERVED0011_SUB),
 		};
 
 		bitfield.0
@@ -298,23 +315,27 @@ impl Encode for Instruction {
 		}
 
 		match kind_res.unwrap() {
-			//Kind::Custom => custom::Instruction::decode(value),
 			Kind::Memory => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
-			Kind::Model => Some(Instruction::Model(model::Instruction::decode(value)?)),
+			Kind::Csr => Some(Instruction::Csr(csr::Instruction::decode(value)?)),
 			Kind::Rrr => Some(Instruction::Rrr(rrr::Instruction::decode(value)?)),
 			Kind::Rri => Some(Instruction::Rri(rri::Instruction::decode(value)?)),
-			_ => None,
+
+			Kind::Custom => Some(Instruction::Custom(misc::Custom::decode(value)?)),
+			Kind::Reserved10 => Some(Instruction::Reserved10(misc::Reserved10::decode(value)?)),
+			Kind::Reserved0011 => Some(Instruction::Reservered0011(misc::Reserved0011::decode(value)?))
 		}
 	}
 
 	fn encode(&self) -> u32 {
 		match self {
-			//Instruction::Custom(i) => i.encode(),
 			Instruction::Memory(i) => i.encode(),
-			//Instruction::Model(i) => i.encode(),
+			Instruction::Csr(i) => i.encode(),
 			Instruction::Rrr(i) => i.encode(),
 			Instruction::Rri(i) => i.encode(),
-			_ => panic!("Unsupported instruction type"),
+
+			Instruction::Custom(i) => i.encode(),
+			Instruction::Reserved10(i) => i.encode(),
+			Instruction::Reservered0011(i) => i.encode(),
 		}
 	}
 }

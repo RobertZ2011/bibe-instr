@@ -7,6 +7,8 @@ use crate::{
 		Operation,
 		OpType,
 	},
+	Shift,
+	ShiftKind,
 	Register,
 	Width,
 };
@@ -23,8 +25,8 @@ bitfield! {
 	pub rd, set_rd : 22, 18;
 	pub rs, set_rs : 17, 13;
 	pub rq, set_rq : 12, 8;
-	pub shift, set_shift : 7, 4;
-	pub res, set_res : 3, 0;
+	pub shift_kind, set_shift_kind : 7, 5;
+	pub shift, set_shift : 4, 0;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,7 +35,7 @@ pub struct Instruction {
 	pub rd: Register,
 	pub rs: Register,
 	pub rq: Register,
-	pub shift: u8,
+	pub shift: Shift,
 }
 
 impl Encode for Instruction {
@@ -51,7 +53,10 @@ impl Encode for Instruction {
 			rd: Register::new(bitfield.rd() as u8).unwrap(),
 			rs: Register::new(bitfield.rs() as u8).unwrap(),
 			rq: Register::new(bitfield.rq() as u8).unwrap(),
-			shift: bitfield.shift() as u8,
+			shift: Shift {
+				kind: ShiftKind::from_u8(bitfield.shift_kind() as u8)?,
+				shift: bitfield.shift() as u8,
+			}
 		})
 	}
 
@@ -64,7 +69,8 @@ impl Encode for Instruction {
 		bitfield.set_rd(self.rd.as_u8() as u32);
 		bitfield.set_rs(self.rs.as_u8() as u32);
 		bitfield.set_rq(self.rq.as_u8() as u32);
-		bitfield.set_shift(self.shift as u32);
+		bitfield.set_shift_kind(self.shift.kind.encode());
+		bitfield.set_shift(self.shift.shift as u32);
 
 		bitfield.0
 
