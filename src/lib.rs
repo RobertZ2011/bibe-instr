@@ -314,6 +314,8 @@ impl Encode for Instruction {
 			return None;
 		}
 
+		debug!("Kind {:?}", kind_res.unwrap());
+
 		match kind_res.unwrap() {
 			Kind::Memory => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
 			Kind::Csr => Some(Instruction::Csr(csr::Instruction::decode(value)?)),

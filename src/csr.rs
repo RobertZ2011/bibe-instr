@@ -6,14 +6,14 @@ use bitfield::bitfield;
 use crate::{
 	Encode,
 	Kind,
-	Register,
+	Register, Width,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum Operation {
-	Read,
-	Res0,
-	Res1,
+	ReadB,
+	ReadS,
+	ReadW,
 	Res2,
 	Res3,
 	Res4,
@@ -28,7 +28,34 @@ pub enum Operation {
 	Res13,
 	Res14,
 
-	Write,
+	WriteB,
+	WriteS,
+	WriteW,
+}
+
+impl Operation {
+	pub fn is_read(self) -> bool {
+		match self {
+			Operation::ReadB | Operation::ReadS | Operation::ReadW => true,
+			_ => false
+		}
+	}
+
+	pub fn is_write(self) -> bool {
+		match self {
+			Operation::WriteB | Operation::WriteS | Operation::WriteW => true,
+			_ => false
+		}
+	}
+
+	pub fn width(self) -> Option<Width> {
+		match self {
+            Operation::ReadB | Operation::WriteB => Some(Width::Byte),
+            Operation::ReadS | Operation::WriteS => Some(Width::Short),
+            Operation::ReadW | Operation::WriteW => Some(Width::Word),
+            _ => None,
+        }
+	}
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -49,7 +76,7 @@ bitfield! {
 
 impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Self> {
-		let bitfield = Bitfield(value);
+		let bitfield = Bitfield(value);;
 		Some(Instruction {
 			op: Operation::from_u32(bitfield.op())?,
 			reg: Register::new(bitfield.reg() as u8)?,
@@ -58,8 +85,7 @@ impl Encode for Instruction {
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = Bitfield(0);
-		bitfield.set_kind(Kind::Csr.to_u32().unwrap());
+		let mut bitfield = Bitfield(Kind::Csr.encode());
 		bitfield.set_op(self.op.to_u32().unwrap());
 		bitfield.set_reg(self.reg.as_u8() as u32);
 		bitfield.set_imm(self.imm);
