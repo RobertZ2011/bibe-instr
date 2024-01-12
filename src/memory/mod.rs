@@ -117,8 +117,7 @@ bitfield! {
 impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Instruction> {
 		let bitfield = Bitfield(value);
-
-		let kind = Kind::from_u32(bitfield.kind())?;
+		let kind = Kind::decode(value)?;
 		if kind != Kind::Memory {
 			return None;
 		}

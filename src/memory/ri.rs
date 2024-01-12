@@ -31,9 +31,9 @@ bitfield! {
 	impl Debug;
 	pub kind, set_kind : 31, 28;
 	pub op, set_op : 27, 23;
-	pub rd, set_rd : 22, 19;
-	pub rs, set_rs : 18, 14;
-	pub imm, set_imm : 13, 0;
+	pub rd, set_rd : 22, 18;
+	pub rs, set_rs : 17, 13;
+	pub imm, set_imm : 12, 0;
 }
 
 impl Encode for Instruction {
@@ -50,15 +50,14 @@ impl Encode for Instruction {
 			op: (op, width),
 			rd: Register::new(bitfield.rd() as u8).unwrap(),
 			rs: Register::new(bitfield.rs() as u8).unwrap(), 
-			imm: sign_extend(bitfield.imm(), 14) as i16,
+			imm: sign_extend(bitfield.imm(), 12) as i16,
 		})
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = Bitfield(0);
+		let mut bitfield = Bitfield(Kind::Memory.encode());
 
-		let op= Operation::from_parts(AddressMode::Rr, self.op.0, self.op.1).unwrap().to_u32().unwrap();
-		bitfield.set_kind(Kind::Memory.to_u32().unwrap());
+		let op= Operation::from_parts(AddressMode::Ri, self.op.0, self.op.1).unwrap().to_u32().unwrap();
 		bitfield.set_op(op);
 		bitfield.set_rd(self.rd.as_u8() as u32);
 		bitfield.set_rs(self.rs.as_u8() as u32);

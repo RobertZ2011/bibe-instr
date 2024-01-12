@@ -61,10 +61,9 @@ impl Encode for Instruction {
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = Bitfield(0);
+		let mut bitfield = Bitfield(Kind::Memory.encode());
 
 		let op= Operation::from_parts(AddressMode::Rr, self.op.0, self.op.1).unwrap().to_u32().unwrap();
-		bitfield.set_kind(Kind::Memory.to_u32().unwrap());
 		bitfield.set_op(op);
 		bitfield.set_rd(self.rd.as_u8() as u32);
 		bitfield.set_rs(self.rs.as_u8() as u32);
