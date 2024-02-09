@@ -11,6 +11,7 @@ pub mod rrr;
 pub mod rri;
 pub mod csr;
 pub mod util;
+pub mod jump;
 
 mod shift;
 
@@ -218,7 +219,9 @@ pub enum BinOp {
 
 	Not,
 	Neg,
-	Cmp,
+	
+	Addcc,
+	Subcc,
 }
 
 impl Encode for BinOp {
@@ -231,27 +234,78 @@ impl Encode for BinOp {
 	}
 }
 
+impl BinOp {
+	pub fn is_cc(&self) -> bool {
+		match self {
+			BinOp::Addcc
+			| BinOp::Subcc => true,
+			_ => false,
+		}
+	}
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LoadStore {
+	Load,
+	Store,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LoadStoreOp {
+	pub op: LoadStore,
+	pub width: Width,
+}
+
+impl LoadStoreOp {
+	pub fn is_load(&self) -> bool {
+		self.op == LoadStore::Load
+	}
+
+	pub fn is_store(&self) -> bool {
+		self.op == LoadStore::Store
+	}
+}
+
+impl Encode for LoadStoreOp {
+	fn decode(value: u32) -> Option<Self> {
+		let op = if value & 0x4 == 0 { LoadStore::Load } else { LoadStore::Store };
+		let width = Width::from_u32(value)?;
+
+		Some(LoadStoreOp {
+			op,
+			width,
+		})
+	}
+
+	fn encode(&self) -> u32 {
+		let encoded = self.width.to_u32().unwrap();
+		match self.op {
+			LoadStore::Load => encoded,
+			LoadStore::Store => encoded | 0x4,
+		}
+	}
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Instruction {
 	Memory(memory::Instruction),
 	Csr(csr::Instruction),
 	Rrr(rrr::Instruction),
 	Rri(rri::Instruction),
-
-	Custom(misc::Custom),
-	Reserved10(misc::Reserved10),
-	Reservered0011(misc::Reserved0011),
+	Jump(jump::Instruction),
+	Reserved0010(misc::Reserved0010),
+	Reserved0011(misc::Reserved0011),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum Kind {
-	Memory,
+	MemoryRr,
+	MemoryRi,
 	Csr,
 	Rrr,
 	Rri,
-
-	Custom,
-	Reserved10,
+	Jump,
+	Reserved0010,
 	Reserved0011
 }
 
@@ -260,46 +314,75 @@ bitfield! {
 	impl Debug;
 	pub high, set_high : 31, 30;
 	pub sub, set_sub : 29, 28;
+	pub discrim, set_discrim: 27, 27;
 }
 
-const MMR_HIGH: u32 = 0x0;
-const RRR_SUB: u32 = 0x0;
-const MEMORY_SUB: u32 = 0x1;
-const MODEL_SUB: u32 = 0x2;
+const RR_HIGH: u32 = 0x0;
+const RR_RRR_SUB: u32 = 0x0;
+const RR_MEM_CSR_SUB: u32 = 0x1;
+const RR_MEM_DISCRIM: u32 = 0x0;
+const RR_CSR_DISCRIM: u32 = 0x1;
+const RESERVED0010_SUB: u32 = 0x2;
 const RESERVED0011_SUB: u32 = 0x3;
 
 const RRI_HIGH: u32 = 0x1;
-const CUSTOM_HIGH: u32 = 0x3;
-const RESERVED10_HIGH: u32 = 0x2;
+const RI_MEM_HIGH: u32 = 0x2;
+const JUMP_HIGH: u32 = 0x3;
 
 impl Encode for Kind {
 	fn decode(value: u32) -> Option<Self> {
 		let bitfield = KindBitfield(value);
 		match bitfield.high() {
-			MMR_HIGH => match bitfield.sub() {
-				RRR_SUB => Some(Kind::Rrr),
-				MEMORY_SUB => Some(Kind::Memory),
-				MODEL_SUB => Some(Kind::Csr),
+			RR_HIGH => match bitfield.sub() {
+				RR_RRR_SUB => Some(Kind::Rrr),
+				RR_MEM_CSR_SUB => {
+					match bitfield.discrim() {
+						RR_MEM_DISCRIM => Some(Kind::MemoryRr),
+						RR_CSR_DISCRIM => Some(Kind::Csr),
+						_ => None,
+					}
+				},
 				_ => None, 
 			},
 			RRI_HIGH => Some(Kind::Rri),
-			CUSTOM_HIGH => Some(Kind::Custom),
+			RI_MEM_HIGH => Some(Kind::MemoryRi),
+			JUMP_HIGH => Some(Kind::Jump),
 			_ => None,
 		}
 	}
 
 	fn encode(&self) -> u32 {
 		let mut bitfield = KindBitfield(0);
-		
 		match self {
-			Kind::Memory => bitfield.set_sub(MEMORY_SUB),
-			Kind::Csr => bitfield.set_sub(MODEL_SUB),
-			Kind::Rrr => bitfield.set_high(MMR_HIGH),
-			Kind::Rri => bitfield.set_high(RRI_HIGH),
-
-			Kind::Custom => bitfield.set_high(CUSTOM_HIGH),
-			Kind::Reserved10 => bitfield.set_high(RESERVED10_HIGH),
-			Kind::Reserved0011 => bitfield.set_sub(RESERVED0011_SUB),
+			Kind::MemoryRr => {
+				bitfield.set_high(RR_HIGH);
+				bitfield.set_sub(RR_MEM_CSR_SUB);
+				bitfield.set_discrim(RR_MEM_DISCRIM);
+			},
+			Kind::MemoryRi => {
+				bitfield.set_high(RI_MEM_HIGH);
+			},
+			Kind::Csr => {
+				bitfield.set_high(RR_HIGH);
+				bitfield.set_sub(RR_MEM_CSR_SUB);
+				bitfield.set_discrim(RR_CSR_DISCRIM);
+			},
+			Kind::Rrr => {
+				bitfield.set_high(RR_HIGH);
+				bitfield.set_sub(RR_RRR_SUB);
+			},
+			Kind::Rri => {
+				bitfield.set_high(RRI_HIGH);
+			},
+			Kind::Jump => {
+				bitfield.set_high(JUMP_HIGH);
+			},
+			Kind::Reserved0010 => {
+				bitfield.set_high(RESERVED0010_SUB);
+			},
+			Kind::Reserved0011 => {
+				bitfield.set_high(RESERVED0011_SUB);
+			}
 		};
 
 		bitfield.0
@@ -317,14 +400,15 @@ impl Encode for Instruction {
 		debug!("Kind {:?}", kind_res.unwrap());
 
 		match kind_res.unwrap() {
-			Kind::Memory => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
+			Kind::MemoryRr => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
+			Kind::MemoryRi => Some(Instruction::Memory(memory::Instruction::decode(value)?)),
 			Kind::Csr => Some(Instruction::Csr(csr::Instruction::decode(value)?)),
 			Kind::Rrr => Some(Instruction::Rrr(rrr::Instruction::decode(value)?)),
 			Kind::Rri => Some(Instruction::Rri(rri::Instruction::decode(value)?)),
+			Kind::Jump => Some(Instruction::Jump(jump::Instruction::decode(value)?)),
 
-			Kind::Custom => Some(Instruction::Custom(misc::Custom::decode(value)?)),
-			Kind::Reserved10 => Some(Instruction::Reserved10(misc::Reserved10::decode(value)?)),
-			Kind::Reserved0011 => Some(Instruction::Reservered0011(misc::Reserved0011::decode(value)?))
+			Kind::Reserved0010 => Some(Instruction::Reserved0010(misc::Reserved0010::decode(value)?)),
+			Kind::Reserved0011 => Some(Instruction::Reserved0011(misc::Reserved0011::decode(value)?))
 		}
 	}
 
@@ -334,10 +418,10 @@ impl Encode for Instruction {
 			Instruction::Csr(i) => i.encode(),
 			Instruction::Rrr(i) => i.encode(),
 			Instruction::Rri(i) => i.encode(),
+			Instruction::Jump(i) => i.encode(),
 
-			Instruction::Custom(i) => i.encode(),
-			Instruction::Reserved10(i) => i.encode(),
-			Instruction::Reservered0011(i) => i.encode(),
+			Instruction::Reserved0010(i) => i.encode(),
+			Instruction::Reserved0011(i) => i.encode(),
 		}
 	}
 }

@@ -17,14 +17,14 @@ use crate::{
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum Condition {
-	Al,
-	Eq,
-	Ne,
-	Gt,
-	Ge,
-	Lt,
-	Le,
-	Nv,
+	Always,
+	Overflow,
+	Carry,
+	Zero,
+	Negative,
+	NotZero,
+	NotNegative,
+	GreaterThan,
 }
 
 impl Encode for Condition {

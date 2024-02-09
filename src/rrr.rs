@@ -1,6 +1,6 @@
 /* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use bitfield::bitfield;
-use num_traits::{ FromPrimitive, ToPrimitive };
+use num_traits::FromPrimitive;
 use log::debug;
 
 use crate::{

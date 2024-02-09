@@ -2,18 +2,13 @@
 use crate::{
 	Encode,
 	Kind,
-	memory::{
-		AddressMode,
-		Operation,
-		OpType,
-	},
+	LoadStoreOp,
 	Shift,
 	ShiftKind,
 	Register,
-	Width,
 };
 
-use num_traits::{ FromPrimitive, ToPrimitive };
+use num_traits::FromPrimitive;
 
 use bitfield::bitfield;
 
@@ -31,7 +26,7 @@ bitfield! {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Instruction {
-	pub op: (OpType, Width),
+	pub op: LoadStoreOp,
 	pub rd: Register,
 	pub rs: Register,
 	pub rq: Register,
@@ -41,15 +36,15 @@ pub struct Instruction {
 impl Encode for Instruction {
 	fn decode(value: u32) -> Option<Self> {
 		let bitfield = Bitfield(value);
-		let (mode, op, width) = Operation::from_u32(bitfield.op())?.parts()?;
+		let op = LoadStoreOp::decode(bitfield.op())?;
 		let kind = Kind::decode(value)?;
 
-		if kind != Kind::Memory || mode != AddressMode::Rr {
+		if kind != Kind::MemoryRr {
 				return None;
 		}
 
 		Some(Instruction {
-			op: (op, width),
+			op: op,
 			rd: Register::new(bitfield.rd() as u8).unwrap(),
 			rs: Register::new(bitfield.rs() as u8).unwrap(),
 			rq: Register::new(bitfield.rq() as u8).unwrap(),
@@ -61,10 +56,9 @@ impl Encode for Instruction {
 	}
 
 	fn encode(&self) -> u32 {
-		let mut bitfield = Bitfield(Kind::Memory.encode());
+		let mut bitfield = Bitfield(Kind::MemoryRr.encode());
 
-		let op= Operation::from_parts(AddressMode::Rr, self.op.0, self.op.1).unwrap().to_u32().unwrap();
-		bitfield.set_op(op);
+		bitfield.set_op(self.op.encode());
 		bitfield.set_rd(self.rd.as_u8() as u32);
 		bitfield.set_rs(self.rs.as_u8() as u32);
 		bitfield.set_rq(self.rq.as_u8() as u32);
