@@ -1,6 +1,8 @@
 /* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
 use bitfield::bitfield;
 
+pub mod regs;
+
 use crate::{
 	Encode, Kind, LoadStoreOp, Register
 };
