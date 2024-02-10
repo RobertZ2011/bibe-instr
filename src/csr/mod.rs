@@ -18,7 +18,7 @@ bitfield! {
 	struct Bitfield(u32);
 	impl Debug;
 	kind, set_kind : 31, 28;
-	op, set_op : 27, 23;
+	op, set_op : 26, 23;
 	reg, set_reg : 22, 18;
 	imm, set_imm : 17, 0;
 }

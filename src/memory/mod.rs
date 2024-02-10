@@ -1,6 +1,4 @@
 /* Copyright 2023 Robert Zieba, see LICENSE file for full license. */
-use bitfield::bitfield;
-
 use crate::{
 	Encode,
 	Kind,
@@ -13,13 +11,6 @@ pub mod ri;
 pub enum Instruction {
 	Rr(rr::Instruction),
 	Ri(ri::Instruction),
-}
-
-bitfield! {
-	struct Bitfield(u32);
-	impl Debug;
-	pub kind, set_kind : 31, 28;
-	pub op, set_op : 27, 23;
 }
 
 impl Encode for Instruction {

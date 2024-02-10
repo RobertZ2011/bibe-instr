@@ -101,7 +101,7 @@ impl LoadStoreOp {
 impl Encode for LoadStoreOp {
 	fn decode(value: u32) -> Option<Self> {
 		let op = if value & 0x4 == 0 { LoadStore::Load } else { LoadStore::Store };
-		let width = Width::from_u32(value)?;
+		let width = Width::from_u32(value & 0x3)?;
 
 		Some(LoadStoreOp {
 			op,
@@ -255,5 +255,16 @@ impl Encode for Instruction {
 			Instruction::Reserved0010(i) => i.encode(),
 			Instruction::Reserved0011(i) => i.encode(),
 		}
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn test() {
+		let i = Instruction::decode(0x1300004C).unwrap();
+		assert!(matches!(i, Instruction::Memory(_)));
 	}
 }
