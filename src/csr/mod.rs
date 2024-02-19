@@ -2,6 +2,7 @@
 use bitfield::bitfield;
 
 pub mod regs;
+pub mod registry;
 
 use crate::{
 	Encode, Kind, LoadStoreOp, Register
